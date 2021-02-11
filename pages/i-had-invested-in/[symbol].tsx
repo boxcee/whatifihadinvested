@@ -153,8 +153,6 @@ class Symbol extends React.Component<SymbolProps, SymbolState> {
 
         const price = calculate(investment, currency, recurring, date, symbol, prices);
 
-        console.log('investment', investment);
-
         return (
             <>
                 <Head>
