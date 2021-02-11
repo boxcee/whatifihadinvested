@@ -1,59 +1,60 @@
 import React from 'react';
 import Head from 'next/head'
-import {InputNumber, Select} from 'antd';
 import 'antd/dist/antd.css';
-
-const {Option} = Select;
-const options = {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'};
+import {NextRouter, withRouter} from 'next/router'
+import coinlist from '../../fixtures/coinlist';
+import Recurring from '../../components/Recurring';
+import Investment from '../../components/Investment';
+import Currency from '../../components/Currency';
+import Coin from '../../components/Coin';
+import DatePicker from '../../components/DatePicker';
+import calculate from "../../utilities/calculate";
+import Price from "../../types/Price";
 
 interface SymbolProps {
     symbol: string;
+    name: string;
     price: string;
+    prices: Price[];
+    router: NextRouter;
 }
 
 interface SymbolState {
-    from: string;
-    currencyInput: string;
+    currency: string;
     showInvestmentInput: boolean;
-    investmentInput: number;
-    showCurrencyInput: boolean;
-}
-
-function Currency({
-                      showCurrencyInput,
-                      currencyInput,
-                      onCurrencySelect,
-                      onCurrencyChangeClick
-                  }) {
-    return showCurrencyInput ?
-        <Select defaultValue={currencyInput} open={true}
-                onSelect={onCurrencySelect}>{['EUR', 'USD'].map((currency) => (
-            <Option value={currency}>{currency}</Option>))}</Select> :
-        <a onClick={onCurrencyChangeClick}>{currencyInput}</a>;
-}
-
-function Investment({
-                        showInvestmentInput,
-                        investmentInput,
-                        onInvestmentChange,
-                        onInvestmentEnter,
-                        onInvestmentChangeClick
-                    }) {
-    return showInvestmentInput ?
-        <InputNumber value={investmentInput} onChange={onInvestmentChange}
-                     onPressEnter={onInvestmentEnter} /> :
-        <a onClick={onInvestmentChangeClick}>{investmentInput}</a>
+    investment: number;
+    showCurrencySelect: boolean;
+    showCoinSelect: boolean;
+    recurring: string;
+    showRecurringSelect: boolean;
+    date: Date;
+    showDateSelect: boolean;
 }
 
 class Symbol extends React.Component<SymbolProps, SymbolState> {
+    static getDerivedStateFromProps({router}, state) {
+        if (!router?.query) {
+            return state;
+        }
+
+        return {
+            ...state,
+            ...router.query,
+        };
+    }
+
     constructor(props) {
         super(props);
         this.state = {
-            from: new Date(Date.now()).toLocaleDateString(undefined, options),
-            currencyInput: 'USD',
+            date: new Date(Date.now()),
+            showDateSelect: false,
+            currency: 'USD',
             showInvestmentInput: false,
-            investmentInput: 100,
-            showCurrencyInput: false,
+            investment: 100,
+            showCurrencySelect: false,
+            showCoinSelect: false,
+            recurring: 'once',
+            showRecurringSelect: false,
         }
     }
 
@@ -65,11 +66,11 @@ class Symbol extends React.Component<SymbolProps, SymbolState> {
 
     onInvestmentChange = (value) => {
         this.setState({
-            investmentInput: value
+            investment: value
         });
     };
 
-    onInvestmentEnter = () => {
+    onInvestmentEnter = (value) => {
         this.setState({
             showInvestmentInput: false
         });
@@ -77,32 +78,94 @@ class Symbol extends React.Component<SymbolProps, SymbolState> {
 
     onCurrencyChangeClick = () => {
         this.setState({
-            showCurrencyInput: true
+            showCurrencySelect: true
         });
     }
 
     onCurrencySelect = (value) => {
         this.setState({
-            currencyInput: value,
-            showCurrencyInput: false
+            currency: value,
+            showCurrencySelect: false
+        });
+    }
+
+    onCoinSelect = async (value) => {
+        const {router} = this.props;
+        const {currency, investment} = this.state;
+
+        this.setState({
+            showCoinSelect: false
+        });
+
+        //const params = new URLSearchParams();
+        //params.append("currency", currency);
+        //params.append("investment", investment.toString());
+        //
+        //await router.push(`/i-had-invested-in/${value}?${params.toString()}`);
+    }
+
+    onCoinChangeClick = () => {
+        this.setState({
+            showCoinSelect: true
+        });
+    }
+
+    onRecurringSelect = (value) => {
+        console.log(value);
+        this.setState({
+            recurring: value,
+            showRecurringSelect: false,
+        });
+    }
+
+    onRecurringChangeClick = () => {
+        this.setState({
+            showRecurringSelect: true
+        });
+    }
+
+    onDateChange = (date, dateString) => {
+        this.setState({
+            date: new Date(dateString),
+            showDateSelect: false
+        });
+    }
+
+    onDateChangeClick = () => {
+        this.setState({
+            showDateSelect: true
         });
     }
 
     render() {
-        const {symbol, price} = this.props;
-        const {currencyInput, showInvestmentInput, investmentInput, showCurrencyInput} = this.state;
+        const {symbol, prices, name} = this.props;
+        const {
+            currency,
+            showInvestmentInput,
+            investment,
+            showCurrencySelect,
+            showCoinSelect,
+            recurring,
+            showRecurringSelect,
+            date,
+            showDateSelect
+        } = this.state;
+
+        const price = calculate(investment, currency, recurring, date, symbol, prices);
+
+        console.log('investment', investment);
 
         return (
             <>
                 <Head>
-                    <title>What if I had invested in {symbol}?</title>
+                    <title>What if I had invested in {name}?</title>
                     <link rel="icon" href="/favicon.ico" />
                 </Head>
                 <main>
                     <h2>What if I had invested
                         &nbsp;
                         <Investment
-                            investmentInput={investmentInput}
+                            investment={investment}
                             onInvestmentChange={this.onInvestmentChange}
                             onInvestmentChangeClick={this.onInvestmentChangeClick}
                             onInvestmentEnter={this.onInvestmentEnter}
@@ -110,21 +173,38 @@ class Symbol extends React.Component<SymbolProps, SymbolState> {
                         />
                         &nbsp;
                         <Currency
-                            currencyInput={currencyInput}
-                            showCurrencyInput={showCurrencyInput}
+                            currency={currency}
+                            showCurrencyInput={showCurrencySelect}
                             onCurrencySelect={this.onCurrencySelect}
                             onCurrencyChangeClick={this.onCurrencyChangeClick}
                         />
-                        &nbsp;once
-                        on {new Date(Date.now()).toLocaleDateString(undefined, options)} in {symbol}?</h2>
-                    <div>{symbol} = {price}</div>
+                        &nbsp;
+                        <Recurring
+                            recurring={recurring}
+                            showRecurringSelect={showRecurringSelect}
+                            onRecurringSelect={this.onRecurringSelect}
+                            onRecurringChangeClick={this.onRecurringChangeClick}
+                        />
+                        {recurring === 'every' && <span>&nbsp;2 days</span>}
+                        &nbsp;{recurring === 'every' ? 'starting' : 'on'}&nbsp;
+                        <DatePicker
+                            showDateSelect={showDateSelect}
+                            date={date}
+                            onDateChange={this.onDateChange}
+                            onDateChangeClick={this.onDateChangeClick}
+                        />
+                        &nbsp;in&nbsp;
+                        <Coin coin={symbol} onCoinSelect={this.onCoinSelect} showCoinSelect={showCoinSelect}
+                              onCoinChangeClick={this.onCoinChangeClick} />
+                        &nbsp;?</h2>
+                    <h3>You would have made {Math.floor(price)} {currency} by today.</h3>
                 </main>
             </>
         );
     }
 }
 
-export default Symbol;
+export default withRouter(Symbol);
 
 const getStockPrice = async (symbol) => {
     const from = new Date(Date.now());
@@ -144,9 +224,7 @@ const getStockPrice = async (symbol) => {
 }
 
 export async function getStaticPaths() {
-    const data = ['BTC', 'ETH', 'XRP', 'BCH', 'ADA', 'XLM', 'NEO', 'LTC', 'EOS', 'XEM', 'IOTA', 'DASH', 'XMR', 'TRX', 'ICX', 'ETC', 'QTUM', 'BTG', 'LSK', 'USDT', 'OMG', 'ZEC', 'SC', 'ZRX', 'REP', 'WAVES', 'MKR', 'DCR', 'BAT', 'LRC', 'KNC', 'BNT', 'LINK', 'CVC', 'STORJ', 'ANT', 'SNGLS', 'MANA', 'MLN', 'DNT', 'NMR', 'DAI', 'ATOM', 'XTZ', 'NANO', 'WBTC', 'BSV', 'DOGE', 'USDC', 'OXT', 'ALGO', 'BAND', 'BTT', 'FET', 'KAVA', 'PAX', 'PAXG', 'REN'];
-
-    const paths = data
+    const paths = coinlist
         .map((item) => `/i-had-invested-in/${item}`)
 
     return {paths, fallback: false}
@@ -172,5 +250,5 @@ export async function getStaticProps({params}) {
 
     const {price} = prices[prices.length - 1]
 
-    return {props: {symbol: params.symbol, price, prices}, revalidate: (60 * 60 * 24)}
+    return {props: {symbol: params.symbol, name: data.name, price, prices}, revalidate: (60 * 60 * 24)}
 }
