@@ -190,6 +190,10 @@ class Symbol extends React.Component<SymbolProps, SymbolState> {
                 <Head>
                     <title>What if I had invested in {name}?</title>
                     <link rel="icon" href="/favicon.ico" />
+                    <meta
+                        name="description"
+                        content={`Calculate how much money you would have made if you had invested in ${name}.`}
+                    />
                 </Head>
                 <Header>
                     <h1 style={{color: '#fff'}}>What if I had invested...</h1>
@@ -285,7 +289,7 @@ const getStockPrice = async (symbol) => {
 
 export async function getStaticPaths() {
     const paths = coinlist
-        .map((item) => `/in/${item}`)
+        .map((item) => `/in/${item}`);
 
     return {paths, fallback: false}
 }
