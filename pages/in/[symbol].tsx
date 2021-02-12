@@ -1,7 +1,5 @@
 import React from 'react';
 import Head from 'next/head'
-import 'antd/dist/antd.css';
-import {NextRouter, withRouter} from 'next/router'
 import coinlist from '../../fixtures/coinlist';
 import Recurring from '../../components/Recurring';
 import Investment from '../../components/Investment';
@@ -10,13 +8,13 @@ import Coin from '../../components/Coin';
 import DatePicker from '../../components/DatePicker';
 import calculate from "../../utilities/calculate";
 import Price from "../../types/Price";
+import Period from "../../components/Period";
 
 interface SymbolProps {
     symbol: string;
     name: string;
     price: string;
     prices: Price[];
-    router: NextRouter;
 }
 
 interface SymbolState {
@@ -29,20 +27,13 @@ interface SymbolState {
     showRecurringSelect: boolean;
     date: Date;
     showDateSelect: boolean;
+    period: string;
+    count: number;
+    showPeriodSelect: boolean;
+    showCountSelect: boolean;
 }
 
 class Symbol extends React.Component<SymbolProps, SymbolState> {
-    static getDerivedStateFromProps({router}, state) {
-        if (!router?.query) {
-            return state;
-        }
-
-        return {
-            ...state,
-            ...router.query,
-        };
-    }
-
     constructor(props) {
         super(props);
         this.state = {
@@ -55,6 +46,10 @@ class Symbol extends React.Component<SymbolProps, SymbolState> {
             showCoinSelect: false,
             recurring: 'once',
             showRecurringSelect: false,
+            period: 'days',
+            count: 2,
+            showCountSelect: false,
+            showPeriodSelect: false,
         }
     }
 
@@ -90,18 +85,9 @@ class Symbol extends React.Component<SymbolProps, SymbolState> {
     }
 
     onCoinSelect = async (value) => {
-        const {router} = this.props;
-        const {currency, investment} = this.state;
-
         this.setState({
             showCoinSelect: false
         });
-
-        //const params = new URLSearchParams();
-        //params.append("currency", currency);
-        //params.append("investment", investment.toString());
-        //
-        //await router.push(`/in/${value}?${params.toString()}`);
     }
 
     onCoinChangeClick = () => {
@@ -125,6 +111,8 @@ class Symbol extends React.Component<SymbolProps, SymbolState> {
     }
 
     onDateChange = (date, dateString) => {
+        console.log(dateString);
+
         this.setState({
             date: new Date(dateString),
             showDateSelect: false
@@ -134,6 +122,34 @@ class Symbol extends React.Component<SymbolProps, SymbolState> {
     onDateChangeClick = () => {
         this.setState({
             showDateSelect: true
+        });
+    }
+
+    onCountChangeClick = () => {
+        this.setState({
+            showCountSelect: true
+        });
+    }
+
+    onCountSelect = (value) => {
+        this.setState({
+            count: value,
+            showCountSelect: false,
+            showPeriodSelect: false
+        });
+    }
+
+    onPeriodChangeClick = () => {
+        this.setState({
+            showPeriodSelect: true
+        });
+    }
+
+    onPeriodSelect = (value) => {
+        this.setState({
+            period: value,
+            showPeriodSelect: false,
+            showCountSelect: false
         });
     }
 
@@ -148,10 +164,23 @@ class Symbol extends React.Component<SymbolProps, SymbolState> {
             recurring,
             showRecurringSelect,
             date,
-            showDateSelect
+            showDateSelect,
+            period,
+            count,
+            showCountSelect,
+            showPeriodSelect,
         } = this.state;
 
-        const price = calculate(investment, currency, recurring, date, symbol, prices);
+        const showPrice = (!showPeriodSelect
+            && !showCountSelect
+            && !showDateSelect
+            && !showRecurringSelect
+            && !showInvestmentInput
+            && !showCurrencySelect);
+
+        const price = showPrice
+            ? calculate(investment, currency, recurring, date, symbol, prices, count, period)
+            : null;
 
         return (
             <>
@@ -183,7 +212,17 @@ class Symbol extends React.Component<SymbolProps, SymbolState> {
                             onRecurringSelect={this.onRecurringSelect}
                             onRecurringChangeClick={this.onRecurringChangeClick}
                         />
-                        {recurring === 'every' && <span>&nbsp;2 days</span>}
+                        <Period
+                            recurring={recurring}
+                            period={period}
+                            count={count}
+                            showCountSelect={showCountSelect}
+                            showPeriodSelect={showPeriodSelect}
+                            onCountChangeClick={this.onCountChangeClick}
+                            onPeriodChangeClick={this.onPeriodChangeClick}
+                            onCountSelect={this.onCountSelect}
+                            onPeriodSelect={this.onPeriodSelect}
+                        />
                         &nbsp;{recurring === 'every' ? 'starting' : 'on'}&nbsp;
                         <DatePicker
                             showDateSelect={showDateSelect}
@@ -195,14 +234,14 @@ class Symbol extends React.Component<SymbolProps, SymbolState> {
                         <Coin coin={symbol} onCoinSelect={this.onCoinSelect} showCoinSelect={showCoinSelect}
                               onCoinChangeClick={this.onCoinChangeClick} />
                         &nbsp;?</h2>
-                    <h3>You <i>would</i> have made {Math.floor(price)} {currency} by today.</h3>
+                    {showPrice && <h3>You <i>would</i> have made {Math.floor(price)} {currency} by today.</h3>}
                 </main>
             </>
         );
     }
 }
 
-export default withRouter(Symbol);
+export default Symbol;
 
 const getStockPrice = async (symbol) => {
     const from = new Date(Date.now());
