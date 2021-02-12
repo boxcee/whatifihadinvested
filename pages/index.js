@@ -1,4 +1,5 @@
 import Head from 'next/head'
+import Link from 'next/link';
 import { Layout } from 'antd';
 
 const {Header, Footer, Content, Sider} = Layout;
@@ -14,7 +15,7 @@ export default function Home() {
       <Layout>
         <Sider>Sider</Sider>
         <Content>
-          <div className="site-layout-content">Content</div>
+          <div className="site-layout-content"><Link href="/in/ETH">...in ETH?</Link></div>
         </Content>
       </Layout>
       <Footer style={{textAlign: 'center'}}>

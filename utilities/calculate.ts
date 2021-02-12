@@ -1,12 +1,9 @@
 import Price from "../types/Price";
 
-const calculate = (investment: number, currency: string, recurring: string, date: Date, symbol: string, prices: Price[], count: number, period: string): number => {
-    let recurringPrices = [];
-    if (recurring !== 'once') {
-        recurringPrices = buildRecurring(date, count, period);
-    }
-
+const calculate = (investment: number, currency: string, recurring: string, date: Date, symbol: string, prices: Price[], count: number, period: string): [number, number] => {
     let amount = 0;
+    let investments = 1;
+    let recurringPrices = [];
     if (recurring === 'once') {
         for (let i = 0; i < prices.length; i++) {
             const dateFromPrice = new Date(prices[i].date);
@@ -19,6 +16,7 @@ const calculate = (investment: number, currency: string, recurring: string, date
             }
         }
     } else {
+        recurringPrices = buildRecurring(date, count, period);
         for (let o = 0; o < recurringPrices.length; o++) {
             const recurringDate = recurringPrices[o];
             for (let i = 0; i < prices.length; i++) {
@@ -38,7 +36,7 @@ const calculate = (investment: number, currency: string, recurring: string, date
         amount = investment / Number(prices[prices.length - 1].price)
     }
 
-    return amount * Number(prices[prices.length - 1].price);
+    return [amount * Number(prices[prices.length - 1].price), investments * (recurringPrices.length || 1)];
 };
 
 const getDays = (count: number, period: string): number => {
@@ -57,12 +55,14 @@ const getDays = (count: number, period: string): number => {
 };
 
 const buildRecurring = (date: Date, count: number, period: string): Date[] => {
-    const result = [];
+    const result = [date];
     const interval = getDays(count, period);
-    let tmpDate = date;
+    let tmpDate = new Date(date);
     while (Date.now() > tmpDate.getTime()) {
         tmpDate.setDate(tmpDate.getDate() + interval);
-        result.push(tmpDate);
+        if (Date.now() > tmpDate.getTime()) {
+            result.push(new Date(tmpDate));
+        }
     }
     return result;
 }
