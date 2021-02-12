@@ -1,7 +1,7 @@
 import Price from "../types/Price";
 
 const calculate = (investment: number, currency: string, recurring: string, date: Date, symbol: string, prices: Price[]): number => {
-    let amount = 0;
+    let amount = investment / Number(prices[prices.length - 1].price);
     for (let i = 0; i < prices.length; i++) {
         const dateFromPrice = new Date(prices[i].date);
         if (date.getFullYear() === dateFromPrice.getFullYear()

@@ -101,7 +101,7 @@ class Symbol extends React.Component<SymbolProps, SymbolState> {
         //params.append("currency", currency);
         //params.append("investment", investment.toString());
         //
-        //await router.push(`/i-had-invested-in/${value}?${params.toString()}`);
+        //await router.push(`/in/${value}?${params.toString()}`);
     }
 
     onCoinChangeClick = () => {
@@ -195,7 +195,7 @@ class Symbol extends React.Component<SymbolProps, SymbolState> {
                         <Coin coin={symbol} onCoinSelect={this.onCoinSelect} showCoinSelect={showCoinSelect}
                               onCoinChangeClick={this.onCoinChangeClick} />
                         &nbsp;?</h2>
-                    <h3>You would have made {Math.floor(price)} {currency} by today.</h3>
+                    <h3>You <i>would</i> have made {Math.floor(price)} {currency} by today.</h3>
                 </main>
             </>
         );
@@ -223,7 +223,7 @@ const getStockPrice = async (symbol) => {
 
 export async function getStaticPaths() {
     const paths = coinlist
-        .map((item) => `/i-had-invested-in/${item}`)
+        .map((item) => `/in/${item}`)
 
     return {paths, fallback: false}
 }
