@@ -1,11 +1,16 @@
 import Head from 'next/head'
-import Link from 'next/link';
-import { Layout } from 'antd';
+import { Layout, Select } from 'antd';
 import React from "react";
+import { useRouter } from "next/router";
+import Link from "next/link";
 
-const {Header, Footer, Content, Sider} = Layout;
+const {Content} = Layout;
+const {Option} = Select;
 
-export default function Home() {
+export default function Home({coins = []}) {
+  const router = useRouter();
+  const {locale} = router;
+
   return (
     <Layout>
       <Head>
@@ -15,25 +20,21 @@ export default function Home() {
           name="description"
           content={`Calculate how much money you would have made if you had invested in some stock or cryptocurrency.`}
         />
-        <meta name="keywords" content="investment, stock, cryptocurrency"/>
+        <meta name="keywords" content="investment, stock, cryptocurrency" />
       </Head>
-      <Header>Header</Header>
-      <Layout>
-        <Sider>Sider</Sider>
-        <Content>
-          <div className="site-layout-content"><Link href="/in/ETH">...in ETH?</Link></div>
-        </Content>
-      </Layout>
-      <Footer style={{textAlign: 'center'}}>
-        Ant Design ©{new Date(Date.now()).getFullYear()} Created by Ant UED
-      </Footer>
-      <style jsx>{`
-        .site-layout-content {
-          min-height: 280px;
-          padding: 24px;
-          background: #fff;
-        }
-      `}</style>
+      <Content>
+        <h1>What if I had invested...</h1>
+        <ul>
+          {coins.map(({asset, name}) => (
+            <li key={asset}>...in <Link href={`/in/${asset}`} locale={locale}>{name}</Link>?</li>))}
+        </ul>
+      </Content>
     </Layout>
   )
+}
+
+export async function getStaticProps() {
+  const res = await fetch('https://www.kraken.com/api/internal/cryptowatch/markets/assets?asset=USD&limit=100');
+  const {result} = await res.json();
+  return {props: {coins: result}};
 }

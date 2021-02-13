@@ -259,11 +259,6 @@ class Symbol extends React.Component<SymbolProps, SymbolState> {
                         </div>
                     )}
                 </Content>
-                <Footer>
-                    <a href={`https://www.kraken.com/en-us/prices/${symbol.toLowerCase()}-${name.toLowerCase()}-price-chart`}>
-                        Want to start buying {name}?
-                    </a>
-                </Footer>
             </Layout>
         );
     }
@@ -271,19 +266,12 @@ class Symbol extends React.Component<SymbolProps, SymbolState> {
 
 export default Symbol;
 
-const getStockPrice = async (symbol) => {
-    const from = new Date(Date.now());
-    from.setDate(from.getDate() - (365 * 30));
-    const fromString = from.toISOString().replace(/:[0-9\.]+Z$/, '');
-
-    const to = new Date(Date.now());
-    to.setDate(from.getDate() + (365 * 30));
-    const toString = to.toISOString().replace(/:[0-9\.]+Z$/, '');
-
+const getStockPrice = async (symbol, currency = 'usd') => {
     try {
-        const res = await fetch(`https://production.api.coindesk.com/v2/price/values/${symbol.toUpperCase()}?start_date=${fromString}&end_date=${toString}&ohlc=false`);
+        const res = await fetch(`https://www.kraken.com/api/internal/cryptowatch/markets/${symbol.toLowerCase()}${currency.toLowerCase()}/ohlc?periods=604800`);
         return res.json();
     } catch (error) {
+        console.error(error);
         return {};
     }
 }
@@ -296,24 +284,16 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps({params}) {
-    const {data} = await getStockPrice(params.symbol);
+    const {result} = await getStockPrice(params.symbol);
 
-    if (!data || !data.entries) {
+    if (!result || result.length === 0) {
         return {
             notFound: true
         };
     }
 
-    const prices = data.entries.map(([, price], index) => {
-        const start = new Date(data.ingestionStart);
-        start.setDate(start.getDate() + index)
-        return {
-            price,
-            date: start.toISOString()
-        };
-    });
+    const asset = result[0];
+    const prices = asset.candlesticks.map(val => ({price: val.cp, date: val.ct * 1000}));
 
-    const {price} = prices[prices.length - 1]
-
-    return {props: {symbol: params.symbol, name: data.name, price, prices}, revalidate: (60 * 60 * 24)}
+    return {props: {prices, symbol: params.symbol}, revalidate: (60 * 60 * 24)}
 }
