@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import Link from 'next/link';
 import { Layout } from 'antd';
+import React from "react";
 
 const {Header, Footer, Content, Sider} = Layout;
 
@@ -10,6 +11,11 @@ export default function Home() {
       <Head>
         <title>What if I had invested...</title>
         <link rel="icon" href="/favicon.ico" />
+        <meta
+          name="description"
+          content={`Calculate how much money you would have made if you had invested in some stock or cryptocurrency.`}
+        />
+        <meta name="keywords" content="investment, stock, cryptocurrency"/>
       </Head>
       <Header>Header</Header>
       <Layout>

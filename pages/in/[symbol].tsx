@@ -194,6 +194,7 @@ class Symbol extends React.Component<SymbolProps, SymbolState> {
                         name="description"
                         content={`Calculate how much money you would have made if you had invested in ${name}.`}
                     />
+                    <meta name="keywords" content={`investment, ${name}, ${symbol}, cryptocurrency`} />
                 </Head>
                 <Header>
                     <h1 style={{color: '#fff'}}>What if I had invested...</h1>
