@@ -1,12 +1,10 @@
-@import 'https://fonts.googleapis.com/css?family=Roboto:300,400,500';
-
 body {
     font-family: "Helvetica", "Arial", sans-serif;
     margin: 0 auto;
     max-width: 50em;
     line-height: 1.5;
     color: #555;
-    background: #73AC63;
+    background: #57c478;
 }
 
 h1,
@@ -16,5 +14,9 @@ strong {
 }
 
 a {
-    color: #74ABD7
+    color: #e9ae0b
+}
+
+a:hover {
+    color: #ffdd0e
 }

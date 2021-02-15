@@ -47,10 +47,10 @@ class Symbol extends React.Component<SymbolProps, SymbolState> {
             investment: 100,
             showCurrencySelect: false,
             showCoinSelect: false,
-            recurring: 'once',
+            recurring: 'every',
             showRecurringSelect: false,
-            period: 'days',
-            count: 2,
+            period: 'months',
+            count: 1,
             showCountSelect: false,
             showPeriodSelect: false,
         }
@@ -100,7 +100,6 @@ class Symbol extends React.Component<SymbolProps, SymbolState> {
     }
 
     onRecurringSelect = (value) => {
-        console.log(value);
         this.setState({
             recurring: value,
             showRecurringSelect: false,
@@ -114,8 +113,6 @@ class Symbol extends React.Component<SymbolProps, SymbolState> {
     }
 
     onDateChange = (date, dateString) => {
-        console.log(dateString);
-
         this.setState({
             date: new Date(dateString),
             showDateSelect: false
@@ -185,6 +182,10 @@ class Symbol extends React.Component<SymbolProps, SymbolState> {
             ? calculate(investment, currency, recurring, date, symbol, prices, count, period)
             : [null, null];
 
+        const valueToday = Math.floor(price * 100) / 100;
+        const investmentToday = investment * investments;
+        const increaseToday = Math.floor((price / (investmentToday) * 100) * 100) / 100;
+
         return (
             <Layout>
                 <Head>
@@ -251,10 +252,9 @@ class Symbol extends React.Component<SymbolProps, SymbolState> {
                             ?</h2>
                         {showPrice && (
                             <>
-                                <p>You would have <b>made</b> {Math.floor(price * 100) / 100} {currency} by today.</p>
-                                <p>You would have <b>invested</b> {investment * investments} {currency} until today.</p>
-                                <p>You would have increased your investment
-                                    by <b>{Math.floor((price / (investment * investments) * 100) * 100) / 100}%</b>.</p>
+                                <p>You would have <b>made</b> {valueToday} {currency} by today.</p>
+                                <p>You would have <b>invested</b> {investmentToday} {currency} until today.</p>
+                                <p>You would have increased your investment by <b>{increaseToday}%</b>.</p>
                             </>
                         )}
                     </div>
@@ -278,7 +278,6 @@ const getStockPrice = async (symbol, currency = 'usd') => {
         const res = await fetch(`https://www.kraken.com/api/internal/cryptowatch/markets/${symbol.toLowerCase()}${currency.toLowerCase()}/ohlc?periods=604800`);
         return res.json();
     } catch (error) {
-        console.error(error);
         return {};
     }
 }
