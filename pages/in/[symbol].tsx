@@ -200,7 +200,7 @@ class Symbol extends React.Component<SymbolProps, SymbolState> {
                     <h1 style={{color: '#fff'}}>What if I had invested...</h1>
                 </Header>
                 <Content>
-                    <div style={{width: 768, marginLeft: 'auto', marginRight: 'auto', marginTop: 36}}>
+                    <div style={{padding: '0 50px', marginTop: 24}}>
                         <h2>...
                             <Investment
                                 investment={investment}
@@ -249,16 +249,23 @@ class Symbol extends React.Component<SymbolProps, SymbolState> {
                                 onCoinChangeClick={this.onCoinChangeClick}
                             />
                             ?</h2>
+                        {showPrice && (
+                            <>
+                                <p>You would have <b>made</b> {Math.floor(price * 100) / 100} {currency} by today.</p>
+                                <p>You would have <b>invested</b> {investment * investments} {currency} until today.</p>
+                                <p>You would have increased your investment
+                                    by <b>{Math.floor((price / (investment * investments) * 100) * 100) / 100}%</b>.</p>
+                            </>
+                        )}
                     </div>
-                    {showPrice && (
-                        <div style={{width: 768, marginLeft: 'auto', marginRight: 'auto'}}>
-                            <p>You would have <b>made</b> {Math.floor(price * 100) / 100} {currency} by today.</p>
-                            <p>You would have <b>invested</b> {investment * investments} {currency} until today.</p>
-                            <p>You would have increased your investment
-                                by <b>{Math.floor((price / (investment * investments) * 100) * 100) / 100}%</b>.</p>
-                        </div>
-                    )}
                 </Content>
+                <Footer>
+                    Want to start trading Cryptocurrency? Head over to <a href="https://kraken.com">kraken.com</a>!
+                    <a href="https://shop.ledger.com/pages/ledger-nano-x?r=8a72acf5e6f5">
+                        <img width={468} height={60} alt="Ledger Nano X - The secure hardware wallet"
+                             src="https://www.ledgerwallet.com/images/promo/banners/ledger_banner_4-6-8x6-0.jpg" />
+                    </a>
+                </Footer>
             </Layout>
         );
     }

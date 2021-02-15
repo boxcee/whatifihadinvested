@@ -10,7 +10,6 @@ const {Option} = Select;
 export default function Home({coins = []}) {
   const router = useRouter();
   const {locale} = router;
-
   return (
     <Layout>
       <Head>
@@ -23,7 +22,12 @@ export default function Home({coins = []}) {
         <meta name="keywords" content="investment, stock, cryptocurrency" />
       </Head>
       <Content>
-        <h1>What if I had invested...</h1>
+        <h1>What if I had invested...?</h1>
+        <p>Always wanted to know how much money you could have made if you had invested into cryptocurrency X at time
+          Y?</p>
+        <p>Don't beat yourself up about a missed opportunity. You can also calculate how much you could have made if had
+          only invested a smaller amount of money on a recurring basis. Not every has a few thousand $ lying around to
+          invest.</p>
         <ul>
           {coins.map(({asset, name}) => (
             <li key={asset}>...in <Link href={`/in/${asset}`} locale={locale}>{name}</Link>?</li>))}
