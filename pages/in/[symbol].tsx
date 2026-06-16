@@ -301,5 +301,5 @@ export async function getStaticProps({params}) {
     const asset = result[0];
     const prices = asset.candlesticks.map(val => ({price: val.cp, date: val.ct * 1000}));
 
-    return {props: {prices, symbol: params.symbol}, revalidate: (60 * 60 * 24)}
+    return {props: {prices, symbol: params.symbol}}
 }

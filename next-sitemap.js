@@ -1,4 +1,4 @@
 module.exports = {
-  siteUrl: 'https://whatifihadinvested.info',
+  siteUrl: 'https://boxcee.github.io/whatifihadinvested',
   generateRobotsTxt: true
 }
